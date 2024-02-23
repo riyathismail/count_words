@@ -1,0 +1,34 @@
+# Load necessary packages
+library(stringr)
+library(tidyverse)
+
+# Read the words or phrases to count from the text file
+words_to_count <- readLines("mydictionary.txt")
+
+# Replace '*' with '.*' to correctly use regular expressions
+words_to_count <- str_replace_all(words_to_count, "\\*", ".*")
+
+# Get a list of text files in the directory
+text_files <- list.files(pattern = "\\.txt$")
+
+# Initialize a data frame to store the results
+word_counts <- data.frame(File = character(), Word = character(), Count = integer())
+
+# Process each text file
+for (text_file in text_files) {
+  # Read the text file
+  text <- readLines(text_file)
+  
+  # Count the occurrences of each word or phrase
+  for (word in words_to_count) {
+    count <- sum(str_count(text, regex(word, ignore_case = TRUE)))
+    word_counts <- rbind(word_counts, data.frame(File = text_file, Word = word, Count = count))
+  }
+}
+
+# Reshape the data frame to get the desired format
+word_counts <- word_counts %>%
+  spread(Word, Count, fill = 0)
+
+# Print the word counts
+print(word_counts)
